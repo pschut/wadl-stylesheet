@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
-    wadl.xsl (05-Apr-2011)
+    wadl.xsl (13-Apr-2011)
     
     Transforms Web Application Description Language (WADL) XML documents into HTML.
 
@@ -45,6 +45,16 @@
     <html>
     <head>
         <xsl:call-template name="getStyle"/>
+				<title>
+					<xsl:choose>
+						<xsl:when test="wadl:doc/@title">
+							<xsl:value-of select="wadl:doc/@title"/>
+						</xsl:when>
+            <xsl:otherwise>
+                Web Application
+            </xsl:otherwise>
+					</xsl:choose>
+				</title>
     </head>
     <body>
     <h1>
@@ -91,7 +101,9 @@
     <!-- Detail -->
     <h2>Resources</h2>
     <xsl:for-each select="wadl:resources">
-        <xsl:call-template name="getDoc"/>
+				<xsl:call-template name="getDoc">
+					 <xsl:with-param name="base" select="$resourceBase"/>
+				</xsl:call-template>
         <br/>
     </xsl:for-each>
     
@@ -137,7 +149,9 @@
             <!-- Description -->
             <td class="summary">
                 <xsl:for-each select="wadl:method">
-                    <xsl:call-template name="getDoc"/>
+                    <xsl:call-template name="getDoc">
+											<xsl:with-param name="base" select="$resourceBase"/> 
+										</xsl:call-template>
                     <br/>
                     <xsl:if test="position() != last()"><br/></xsl:if>  <!-- Add a spacer -->
                 </xsl:for-each>
@@ -178,7 +192,11 @@
                 </xsl:call-template>
             </a>
         </h3>
-        <p><xsl:call-template name="getDoc"/></p>
+        <p>
+					<xsl:call-template name="getDoc">
+             <xsl:with-param name="base" select="$resourcePath"/>
+					</xsl:call-template>
+				</p>
 
         <h5>Methods</h5>
 
@@ -199,7 +217,11 @@
                         </td>
                     </tr>
                 </table>
-                <p><xsl:call-template name="getDoc"/></p>
+                <p>
+									<xsl:call-template name="getDoc">
+										 <xsl:with-param name="base" select="$resourceBase"/>
+									</xsl:call-template>
+								</p>
 
                 <!-- Request -->
                 <h6>request</h6>
@@ -348,12 +370,20 @@
 </xsl:template>
 
 <xsl:template name="getDoc">
+    <xsl:param name="base"/>
     <xsl:for-each select="wadl:doc">
         <xsl:if test="position() > 1"><br/></xsl:if>
         <xsl:if test="@title and local-name(..) != 'application'">
             <xsl:value-of select="@title"/>:
         </xsl:if>
-        <xsl:value-of select="text()"/>
+				<xsl:choose>
+						<xsl:when test="@title = 'Example'">
+							<xsl:element name="a">
+								<xsl:attribute name="href"><xsl:value-of select="$base"/><xsl:value-of select="text()"/></xsl:attribute><xsl:value-of select="$base"/><xsl:value-of select="text()"/>
+							</xsl:element>
+						</xsl:when>
+						<xsl:otherwise><xsl:value-of select="text()"/></xsl:otherwise>
+				</xsl:choose>
     </xsl:for-each>
 </xsl:template>
 
